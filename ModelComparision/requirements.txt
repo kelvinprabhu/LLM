@@ -1,0 +1,12 @@
+transformers
+streamlit
+nltk
+torch
+torchvision
+pandas
+evaluate
+datasets
+hf_xet
+plotly
+absl-py 
+rouge-score
