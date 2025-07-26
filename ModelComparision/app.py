@@ -1,155 +1,27 @@
-# # Streamlit App: Compare Foundation vs Domain-Specific NLP Models for Fill-Mask Task
-
-# import streamlit as st
-# import pandas as pd
-# from transformers import pipeline
-
-# # --- UI Configuration ---
-# st.set_page_config(
-#     page_title="NLP Model Comparison",
-#     layout="wide"
-# )
-
-# st.title("🎯 Foundation vs. Domain-Specific Model Comparison")
-# st.write("""
-# This app compares a general-purpose **foundation model** with a **domain-specific model** on a **Fill-Mask** task. 
-# Enter a sentence with a `[MASK]` token and see which model provides more contextually relevant predictions.
-# """)
-
-# # --- Model Selection ---
-# # Models suitable for the Fill-Mask task
-# FOUNDATION_MODELS = {
-#     "BERT (Base, Uncased)": "bert-base-uncased",
-#     "RoBERTa (Base)": "roberta-base",
-#     "DistilBERT (Base, Uncased)": "distilbert-base-uncased",
-# }
-
-# DOMAIN_MODELS = {
-#     "BioClinicalBERT (Medical)": "emilyalsentzer/Bio_ClinicalBERT",
-#     "SciBERT (Scientific)": "allenai/scibert_scivocab_uncased",
-#     "FinBERT (Financial)": "ProsusAI/finbert",
-#     "LegalBERT (Legal)": "nlpaueb/legal-bert-base-uncased",
-# }
-
-# # --- Sample Texts ---
-# # Each sample now includes a [MASK] token for the fill-mask task.
-# SAMPLE_TEXTS = {
-#     "Medical": "A patient with chronic kidney disease requires weekly [MASK].",
-#     "Scientific": "New research in [MASK] shows promising results for cancer treatment.",
-#     "Financial": "The company's stock price saw a significant [MASK] after the earnings report.",
-#     "Legal": "The defendant was found [MASK] by the jury.",
-#     "General": "The best way to learn a new language is to practice it [MASK]."
-# }
-
-# # --- Caching ---
-# # Cache the pipeline creation for performance
-# @st.cache_resource(show_spinner="Loading models...")
-# def load_fill_mask_pipeline(model_name):
-#     """Loads a fill-mask pipeline for a given model name."""
-#     return pipeline("fill-mask", model=model_name)
-
-# # --- App Layout ---
-# col1, col2 = st.columns(2)
-
-# with col1:
-#     st.header("Foundation Model")
-#     foundation_choice_key = st.selectbox(
-#         "Choose a foundation model:",
-#         options=list(FOUNDATION_MODELS.keys())
-#     )
-#     foundation_model_name = FOUNDATION_MODELS[foundation_choice_key]
-
-# with col2:
-#     st.header("Domain-Specific Model")
-#     domain_choice_key = st.selectbox(
-#         "Choose a domain-specific model:",
-#         options=list(DOMAIN_MODELS.keys())
-#     )
-#     domain_model_name = DOMAIN_MODELS[domain_choice_key]
-
-# # --- Input Section ---
-# st.header("Input Text")
-# input_option = st.radio(
-#     "Choose an input method:",
-#     ["Select from samples", "Enter manually"],
-#     horizontal=True,
-#     label_visibility="collapsed"
-# )
-
-# if input_option == "Select from samples":
-#     sample_category = st.selectbox("Select a domain:", list(SAMPLE_TEXTS.keys()))
-#     input_text = st.text_area(
-#         "Input sentence with `[MASK]` token:",
-#         value=SAMPLE_TEXTS[sample_category],
-#         height=100
-#     )
-# else:
-#     input_text = st.text_area(
-#         "Input sentence with `[MASK]` token:",
-#         value="The patient's symptoms suggest a diagnosis of [MASK].",
-#         height=100
-#     )
-
-# # --- Run & Display Results ---
-# if st.button("🚀 Compare Models"):
-#     if not input_text or "[MASK]" not in input_text:
-#         st.error("Please provide an input sentence containing the `[MASK]` token.")
-#     else:
-#         # Load pipelines
-#         pipe_foundation = load_fill_mask_pipeline(foundation_model_name)
-#         pipe_domain = load_fill_mask_pipeline(domain_model_name)
-
-#         # Get predictions
-#         with st.spinner("Generating predictions..."):
-#             predictions_foundation = pipe_foundation(input_text)
-#             predictions_domain = pipe_domain(input_text)
-
-#         st.header("📊 Comparison of Top Predictions")
-#         st.info(f"**Your Input:** {input_text.replace('[MASK]', '**[MASK]**')}")
-
-#         # Create DataFrames for display
-#         df_foundation = pd.DataFrame(predictions_foundation).rename(
-#             columns={"score": "Confidence", "token_str": "Predicted Token", "sequence": "Filled Sentence"}
-#         )
-#         df_foundation['Confidence'] = df_foundation['Confidence'].map('{:.2%}'.format)
-
-#         df_domain = pd.DataFrame(predictions_domain).rename(
-#             columns={"score": "Confidence", "token_str": "Predicted Token", "sequence": "Filled Sentence"}
-#         )
-#         df_domain['Confidence'] = df_domain['Confidence'].map('{:.2%}'.format)
-
-#         # Display results side-by-side
-#         res_col1, res_col2 = st.columns(2)
-#         with res_col1:
-#             st.subheader(f"Results from `{foundation_choice_key}`")
-#             st.dataframe(df_foundation[['Predicted Token', 'Confidence', 'Filled Sentence']], use_container_width=True)
-
-#         with res_col2:
-#             st.subheader(f"Results from `{domain_choice_key}`")
-#             st.dataframe(df_domain[['Predicted Token', 'Confidence', 'Filled Sentence']], use_container_width=True)
-
-
-# Streamlit App: Compare Foundation vs Domain-Specific NLP Models for Fill-Mask Task
-
 import streamlit as st
 import pandas as pd
 import plotly.express as px
 from transformers import pipeline
 
 # --- UI Configuration ---
-st.set_page_config(
-    page_title="NLP Model Comparison",
-    layout="wide"
-)
+st.set_page_config(page_title="NLP Model Comparator", layout="wide", page_icon="🧠")
 
-st.title("🎯 Foundation vs. Domain-Specific Model Comparison")
-st.write("""
-This app compares a general-purpose **foundation model** with a **domain-specific model** on a **Fill-Mask** task. 
-Enter a sentence with a `[MASK]` token to see which model provides more contextually relevant predictions. The results are shown in both graphs and tables.
-""")
+st.markdown("""
+    <style>
+        .main {background-color: #f8f9fa;}
+        .block-container {padding: 2rem 2rem;}
+        h1, h2, h3, h4 {color: #2c3e50;}
+        .stButton>button {background-color: #1abc9c; color: white;}
+        .stButton>button:hover {background-color: #16a085;}
+        .stRadio>div>label {font-weight: bold;}
+        .stDataFrameContainer {background-color: white; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.05);}
+    </style>
+""", unsafe_allow_html=True)
 
-# --- Model Selection ---
-# Models suitable for the Fill-Mask task
+st.title("🧠 NLP Model Comparator: Foundation vs Domain-Specific")
+st.write("Compare the performance of a general-purpose **foundation model** and a **domain-specific model** on a `Fill-Mask` task. This tool visualizes top predictions based on model confidence.")
+
+# --- Model Lists ---
 FOUNDATION_MODELS = {
     "BERT (Base, Uncased)": "bert-base-uncased",
     "RoBERTa (Base)": "roberta-base",
@@ -163,8 +35,6 @@ DOMAIN_MODELS = {
     "LegalBERT (Legal)": "nlpaueb/legal-bert-base-uncased",
 }
 
-# --- Sample Texts ---
-# Each sample now includes a [MASK] token for the fill-mask task.
 SAMPLE_TEXTS = {
     "Medical": "A patient with chronic kidney disease requires weekly [MASK].",
     "Scientific": "New research in [MASK] shows promising results for cancer treatment.",
@@ -173,121 +43,72 @@ SAMPLE_TEXTS = {
     "General": "The best way to learn a new language is to practice it [MASK]."
 }
 
-# --- Caching ---
-# Cache the pipeline creation for performance
-@st.cache_resource(show_spinner="Loading models...")
+@st.cache_resource(show_spinner="🔄 Loading model...")
 def load_fill_mask_pipeline(model_name):
-    """Loads a fill-mask pipeline for a given model name."""
     return pipeline("fill-mask", model=model_name)
 
-# --- App Layout ---
-st.sidebar.header("⚙️ Model Selection")
-foundation_choice_key = st.sidebar.selectbox(
-    "Choose a Foundation Model:",
-    options=list(FOUNDATION_MODELS.keys())
-)
-foundation_model_name = FOUNDATION_MODELS[foundation_choice_key]
+# --- Sidebar Selection ---
+st.sidebar.header("⚙️ Model Settings")
 
-domain_choice_key = st.sidebar.selectbox(
-    "Choose a Domain-Specific Model:",
-    options=list(DOMAIN_MODELS.keys())
-)
-domain_model_name = DOMAIN_MODELS[domain_choice_key]
+foundation_choice = st.sidebar.selectbox("Foundation Model", list(FOUNDATION_MODELS.keys()))
+domain_choice = st.sidebar.selectbox("Domain-Specific Model", list(DOMAIN_MODELS.keys()))
+
+foundation_model_name = FOUNDATION_MODELS[foundation_choice]
+domain_model_name = DOMAIN_MODELS[domain_choice]
 
 # --- Input Section ---
-st.header("✍️ Input Text")
-input_option = st.radio(
-    "Choose an input method:",
-    ["Select from samples", "Enter manually"],
-    horizontal=True,
-    label_visibility="collapsed"
-)
+st.markdown("### ✍️ Input your masked sentence")
 
-if input_option == "Select from samples":
-    sample_category = st.selectbox("Select a sample sentence domain:", list(SAMPLE_TEXTS.keys()))
-    input_text = st.text_area(
-        "Input sentence with `[MASK]` token:",
-        value=SAMPLE_TEXTS[sample_category],
-        height=100
-    )
+input_method = st.radio("Input Method:", ["Select a Sample", "Write Your Own"], horizontal=True)
+
+if input_method == "Select a Sample":
+    category = st.selectbox("Sample Domain", list(SAMPLE_TEXTS.keys()))
+    input_text = st.text_area("Input Sentence", value=SAMPLE_TEXTS[category], height=100)
 else:
-    input_text = st.text_area(
-        "Input sentence with `[MASK]` token:",
-        value="The patient's symptoms suggest a diagnosis of [MASK].",
-        height=100
-    )
+    input_text = st.text_area("Enter sentence (use [MASK])", value="The patient's symptoms suggest a diagnosis of [MASK].", height=100)
 
-# --- Run & Display Results ---
-if st.button("🚀 Compare Models"):
-    if not input_text or "[MASK]" not in input_text:
-        st.error("Please provide an input sentence containing the `[MASK]` token.")
+if st.button("🚀 Run Comparison"):
+    if "[MASK]" not in input_text:
+        st.error("⚠️ Please include a `[MASK]` token in the input text.")
     else:
-        # Load pipelines
-        pipe_foundation = load_fill_mask_pipeline(foundation_model_name)
-        pipe_domain = load_fill_mask_pipeline(domain_model_name)
+        with st.spinner("🔍 Generating predictions..."):
+            pipe_foundation = load_fill_mask_pipeline(foundation_model_name)
+            pipe_domain = load_fill_mask_pipeline(domain_model_name)
 
-        # Get predictions
-        with st.spinner("Generating predictions..."):
             predictions_foundation = pipe_foundation(input_text)
             predictions_domain = pipe_domain(input_text)
 
-        st.header("📊 Comparison of Top Predictions")
-        st.info(f"**Your Input:** {input_text.replace('[MASK]', '**[MASK]**')}")
+        st.markdown(f"### 📥 Input Provided")
+        st.markdown(f"`{input_text}`")
 
         col1, col2 = st.columns(2)
 
-        # --- Display Foundation Model Results ---
+        # --- Foundation Model Output ---
         with col1:
-            st.subheader(f"Results from `{foundation_choice_key}`")
-            
-            # Create a DataFrame from raw predictions
-            df_foundation = pd.DataFrame(predictions_foundation)
-            
-            # 1. Create and display the interactive graph
-            fig_foundation = px.bar(
-                df_foundation,
-                x="token_str",
-                y="score",
-                title=f"Top Predictions by {foundation_choice_key}",
-                labels={"token_str": "Predicted Token", "score": "Confidence Score"},
-                color="score",
-                color_continuous_scale=px.colors.sequential.Blues_r,
-                text_auto='.2%'
-            )
-            fig_foundation.update_layout(xaxis_title="", yaxis_title="Confidence")
-            st.plotly_chart(fig_foundation, use_container_width=True)
+            st.markdown(f"### 🧱 Foundation Model: `{foundation_choice}`")
+            df_f = pd.DataFrame(predictions_foundation)
+            fig_f = px.bar(df_f, x="token_str", y="score", title=f"{foundation_choice} Predictions",
+                           labels={"token_str": "Token", "score": "Confidence"},
+                           color="score", text_auto='.2%',
+                           color_continuous_scale="Blues")
+            fig_f.update_layout(xaxis_title="", yaxis_title="Score", template="plotly_white")
+            st.plotly_chart(fig_f, use_container_width=True)
 
-            # 2. Prepare and display the formatted table
-            df_foundation_display = df_foundation.rename(
-                columns={"score": "Confidence", "token_str": "Predicted Token", "sequence": "Filled Sentence"}
-            )
-            df_foundation_display['Confidence'] = df_foundation_display['Confidence'].map('{:.2%}'.format)
-            st.dataframe(df_foundation_display[['Predicted Token', 'Confidence', 'Filled Sentence']], use_container_width=True, hide_index=True)
+            df_f_display = df_f.rename(columns={"token_str": "Prediction", "score": "Confidence", "sequence": "Completed Sentence"})
+            df_f_display['Confidence'] = df_f_display['Confidence'].map('{:.2%}'.format)
+            st.dataframe(df_f_display[["Prediction", "Confidence", "Completed Sentence"]], use_container_width=True, hide_index=True)
 
-        # --- Display Domain-Specific Model Results ---
+        # --- Domain Model Output ---
         with col2:
-            st.subheader(f"Results from `{domain_choice_key}`")
-            
-            # Create a DataFrame from raw predictions
-            df_domain = pd.DataFrame(predictions_domain)
+            st.markdown(f"### 🧩 Domain-Specific Model: `{domain_choice}`")
+            df_d = pd.DataFrame(predictions_domain)
+            fig_d = px.bar(df_d, x="token_str", y="score", title=f"{domain_choice} Predictions",
+                           labels={"token_str": "Token", "score": "Confidence"},
+                           color="score", text_auto='.2%',
+                           color_continuous_scale="Greens")
+            fig_d.update_layout(xaxis_title="", yaxis_title="Score", template="plotly_white")
+            st.plotly_chart(fig_d, use_container_width=True)
 
-            # 1. Create and display the interactive graph
-            fig_domain = px.bar(
-                df_domain,
-                x="token_str",
-                y="score",
-                title=f"Top Predictions by {domain_choice_key}",
-                labels={"token_str": "Predicted Token", "score": "Confidence Score"},
-                color="score",
-                color_continuous_scale=px.colors.sequential.Greens_r,
-                text_auto='.2%'
-            )
-            fig_domain.update_layout(xaxis_title="", yaxis_title="Confidence")
-            st.plotly_chart(fig_domain, use_container_width=True)
-
-            # 2. Prepare and display the formatted table
-            df_domain_display = df_domain.rename(
-                columns={"score": "Confidence", "token_str": "Predicted Token", "sequence": "Filled Sentence"}
-            )
-            df_domain_display['Confidence'] = df_domain_display['Confidence'].map('{:.2%}'.format)
-            st.dataframe(df_domain_display[['Predicted Token', 'Confidence', 'Filled Sentence']], use_container_width=True, hide_index=True)
+            df_d_display = df_d.rename(columns={"token_str": "Prediction", "score": "Confidence", "sequence": "Completed Sentence"})
+            df_d_display['Confidence'] = df_d_display['Confidence'].map('{:.2%}'.format)
+            st.dataframe(df_d_display[["Prediction", "Confidence", "Completed Sentence"]], use_container_width=True, hide_index=True)
